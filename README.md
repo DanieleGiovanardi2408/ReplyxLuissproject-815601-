@@ -9,8 +9,8 @@ Team: Daniele Giovanardi · Filippo Nannucci · Edoardo Riva.
 
 Reply asked us to build an anomaly-detection system on NoiPA airport-security data and to argue which architecture is more convenient. We built the same detection logic twice:
 
-1. a **classical pipeline**, organised as six sequential steps (EDA → preprocessing → feature engineering → baseline → ensemble → post-processing → evaluation), inlined inside `main.ipynb` so that a reviewer can read it top-to-bottom without leaving the notebook;
-2. a **multi-agent LangGraph system** with five specialised agents (Data, Baseline, Outlier, RiskProfiling, Report) plus an optional `Supervisor` verifier wired into the graph as a conditional branch. This pipeline lives in the `multiagent_pipeline/` Python library and is imported by Sections 8–12 of `main.ipynb`.
+1. a **classical pipeline**, organised as seven sequential steps (EDA → preprocessing → feature engineering → baseline → ensemble → post-processing → evaluation), inlined inside `main.ipynb` so that a reviewer can read it top-to-bottom without leaving the notebook;
+2. a **multi-agent LangGraph system** with five specialised agents (Data, Baseline, Outlier, RiskProfiling, Report) plus an optional `Supervisor` verifier wired into the graph as a conditional branch. This pipeline lives in the `multiagent_pipeline/` Python library and is imported by Sections 8 and 10–12 of `main.ipynb`.
 
 Both pipelines share the same preprocessing module, the same feature builder, the same MAD-based baseline, the same business rules and the same ensemble weights. The only real difference is the orchestration layer: a sequential script vs a LangGraph DAG with four data-driven conditional edges (one of them a feedback cycle bounded by an iteration cap).
 
