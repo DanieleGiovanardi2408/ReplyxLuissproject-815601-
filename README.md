@@ -154,11 +154,19 @@ The notebook `notebooks/07_comparison_classical_vs_multiagent.ipynb` contains th
 
 ## Results
 
-![Top anomalous routes](images/top_routes_risk.png)
+The three images below summarise the deliverable: which routes get flagged, how the two pipelines agree on the labels, and how their numerical scores correlate route-by-route.
 
-![Feature distributions](images/feature_distributions.png)
+![Top 15 routes by ensemble anomaly score](images/top_routes_anomaly_score.png)
 
-![Feature correlation](images/feature_correlation.png)
+*Top 15 routes by ensemble anomaly score (multi-agent pipeline, weighted IF · LOF · Z · AE). All 15 fall above the p97 threshold and are tagged ALTA. Note the clear lead of CMN-BLQ (Casablanca → Bologna) at 0.700.*
+
+![Risk-label distribution and pipeline agreement](images/risk_label_distribution.png)
+
+*Both pipelines produce the same 17 / 40 / 510 distribution and agree on 557 / 567 labels. The 98.24 % point estimate is the convergence certificate between the two architectures.*
+
+![Score correlation](images/score_correlation_classical_vs_multiagent.png)
+
+*Per-route correlation between the classical `anomaly_score` and the multi-agent `ensemble_score`. Pearson r = 0.9965, Spearman ρ = 0.9979. Points hug the y = x reference line; the residual scatter at the boundary is driven entirely by the stochastic Autoencoder.*
 
 ---
 
@@ -172,10 +180,10 @@ classical-vs-multiagent/
 ├── requirements.txt
 ├── .env.example                        # ANTHROPIC_API_KEY template
 │
-├── images/                             # Charts and visualisations
-│   ├── top_routes_risk.png
-│   ├── feature_distributions.png
-│   └── feature_correlation.png
+├── images/                             # Result charts (regenerable via scripts/build_result_images.py)
+│   ├── top_routes_anomaly_score.png
+│   ├── risk_label_distribution.png
+│   └── score_correlation_classical_vs_multiagent.png
 │
 ├── data/
 │   ├── raw/                            # Source CSVs (gitignored — confidential)
