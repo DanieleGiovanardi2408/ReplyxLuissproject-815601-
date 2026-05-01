@@ -1,0 +1,73 @@
+# ── Virtual Environment ───────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# ── Environment Variables (mai committare le API keys!) ───────────
+.env
+.env.*
+!.env.example
+
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ── Jupyter ───────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── Data (do not upload sensitive data to GitHub) ─────────────────
+data/raw/*.csv
+data/raw/*.json
+data/raw/*.xlsx
+data/processed/*.csv
+data/processed/*.parquet
+data/processed/*.json
+
+# ── Runtime-generated reports & artifacts ─────────────────────────
+reports/*.html
+reports/*.pdf
+*.docx
+report_*.pdf
+CHECKPOINT_*.docx
+
+# ── VS Code ───────────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ── macOS ─────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ── R / RStudio ──────────────────────────────────────────────────
+.Rhistory
+.RData
+.Rproj.user
+
+# ── Windows ───────────────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ── mypy / pytest / coverage ──────────────────────────────────────
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log
+logs/
