@@ -7,20 +7,20 @@ Team: Daniele Giovanardi · Filippo Nannucci · Edoardo Riva.
 
 ## What we built
 
-Reply asked us to build an anomaly-detection system on NoiPA airport-security data and to argue which architecture is more convenient. We built the same detection logic twice:
+Reply gave us a sample dataset of border-control passenger transits at Italian airports, framed as the NoiPA validation use case (the MEF digital platform receives heterogeneous datasets from third-party authorities and needs to validate them automatically). Our task was to build an anomaly-detection system on these transit records and to argue which architecture is more convenient. We built the same detection logic twice:
 
 1. a **classical pipeline**, organised as seven sequential steps (EDA → preprocessing → feature engineering → baseline → ensemble → post-processing → evaluation), inlined inside `main.ipynb` so that a reviewer can read it top-to-bottom without leaving the notebook;
 2. a **multi-agent LangGraph system** with five specialised agents (Data, Baseline, Outlier, RiskProfiling, Report) plus an optional `Supervisor` verifier wired into the graph as a conditional branch. This pipeline lives in the `multiagent_pipeline/` Python library and is imported by Sections 8 and 10–12 of `main.ipynb`.
 
 Both pipelines share the same preprocessing module, the same feature builder, the same MAD-based baseline, the same business rules and the same ensemble weights. The only real difference is the orchestration layer: a sequential script vs a LangGraph DAG with four data-driven conditional edges (one of them a feedback cycle bounded by an iteration cap).
 
-On the 567 routes of NoiPA data the two pipelines produce **the same risk distribution** (17 ALTA, 40 MEDIA, 510 NORMALE) and **agree on 557 of 567 labels (98.24 %)**. Convergence is the point of the brief: it shows that both implementations are correct. The 10 residual disagreements (1.76 %) all sit at the MEDIA / NORMALE boundary and are driven entirely by the stochastic Autoencoder.
+On the 567 routes of the border-control dataset the two pipelines produce **the same risk distribution** (17 ALTA, 40 MEDIA, 510 NORMALE) and **agree on 557 of 567 labels (98.24 %)**. Convergence is the point of the brief: it shows that both implementations are correct. The 10 residual disagreements (1.76 %) all sit at the MEDIA / NORMALE boundary and are driven entirely by the stochastic Autoencoder.
 
 ---
 
 ## The data
 
-The dataset comes from **NoiPA**, the Italian airport border-control system. Two raw CSVs:
+The dataset is composed of **passenger transit and alarm records from Italian airport border-control authorities**, provided by Reply as the example dataset for the NoiPA validation use case (NoiPA itself is the MEF digital platform that ingests heterogeneous external datasets and needs to validate them — *not* the source of these specific records). Two raw CSVs:
 
 | File | Content |
 |------|---------|
@@ -168,7 +168,7 @@ Then `Run All`. The notebook is organised as **thirteen sections** that follow t
 | 9 | Comparative Analysis | Classical vs multi-agent: agreement, per-model correlation, top-K overlap |
 | 10 | Bootstrap CI | 1 000 resamples at 80 % subsample to size the agreement metric |
 | 11 | Threshold sensitivity | Perturbation of the five rule thresholds by ±20 % |
-| 12 | Temporal coverage | Linear-trend slope per route as a 13-month-panel-friendly substitute for STL |
+| 12 | Temporal coverage | Linear-trend slope per route as a short-panel-friendly substitute for STL (3 months of data) |
 | 13 | Conclusions | When to choose which architecture, limits, future work |
 
 End-to-end runtime on the 2024 perimeter (567 routes):
@@ -228,7 +228,7 @@ ReplyxLuissproject-815601-/
 
 Three choices we want to call out because they look like deviations from the brief but were the right call given the data we had.
 
-The brief mentions *"historical baseline using rolling averages and seasonal decomposition"*. We tried it and stepped back. The dataset has only 13 months of observations and the median route appears in just 2 of them, so STL needs at least 12 observations per series and a rolling 3-month mean over 3 points collapses to the cross-sectional mean we already compute. Robust z-scores against the population are mathematically sounder for this sample size; we still added a per-route linear-trend slope (Section 12 of the notebook) to capture the temporal signal the dataset can actually support.
+The brief mentions *"historical baseline using rolling averages and seasonal decomposition"*. We tried it and stepped back. The dataset spans only 3 months in total (December 2023 plus January and February 2024), so STL — which needs at least 12 observations per series — cannot run, and a rolling 3-month mean collapses to the cross-sectional mean we already compute. Robust z-scores against the population are mathematically sounder for this sample size; we still added a per-route linear-trend slope (Section 12 of the notebook) to capture the temporal signal the dataset can actually support, on the subset of routes that appear in all three months.
 
 The brief lists *"IsolationForest, LOF or Z-score"*. We blend all four — IF 0.35, LOF 0.30, Z 0.15, Autoencoder 0.20 — because the autoencoder catches non-linear feature combinations the other three miss. It also degrades gracefully: with fewer than 30 normal samples the autoencoder is excluded and the remaining weights are renormalised, so small perimeters still produce a coherent score.
 
@@ -240,7 +240,7 @@ Both pipelines use the same MAD z-score baseline (median ± 1.4826 · MAD per `B
 
 ## Limits
 
-The whole evaluation runs on a single dataset. We have not stress-tested the pipelines on a different schema, although the `DataAgent` has an LLM schema-normalisation layer ready for the case (it has not had to fire on the NoiPA data because the canonical columns are all there). The temporal model we added (linear trend slope per route) is the most we can extract from a 13-month panel where most routes appear in 2–3 months; a longer panel would unlock STL and rolling means without changing the rest of the pipeline. The LLM narratives are reviewed in spot checks but not programmatically validated against a ground truth — the ReportAgent prompt forbids hallucination but we do not prove zero hallucination automatically.
+The whole evaluation runs on a single dataset. We have not stress-tested the pipelines on a different schema, although the `DataAgent` has an LLM schema-normalisation layer ready for the case (it has not had to fire on this dataset because the canonical columns are all present). The temporal model we added (linear trend slope per route) is the most we can extract from a 3-month panel where most routes appear in 1–2 months; a longer panel would unlock STL and rolling means without changing the rest of the pipeline. The LLM narratives are reviewed in spot checks but not programmatically validated against a ground truth — the ReportAgent prompt forbids hallucination but we do not prove zero hallucination automatically.
 
 ## Future work
 
